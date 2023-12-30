@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <layer-list>
+            <!-- Background of the dropdown item -->
+            <item>
+                <shape android:shape="rectangle">
+                    <solid android:color="#F9F6F6" />
+                    <stroke android:width="1dp" android:color="#D3D2D2" />
+                </shape>
+            </item>
+            <!-- Arrow drawable on the right -->
+            <item android:drawable="@drawable/arrow_2" android:gravity="center_vertical|right" android:right="10dp" />
+        </layer-list>
+    </item>
+</selector>
