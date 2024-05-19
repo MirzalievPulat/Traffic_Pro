@@ -3,6 +3,7 @@ package uz.frodo.trafficpro.adapter
 import android.net.Uri
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -12,13 +13,13 @@ import uz.frodo.trafficpro.R
 import uz.frodo.trafficpro.databinding.ItemBinding
 import uz.frodo.trafficpro.models.Sign
 
-class RvAdapter(val onClick: OnClick):ListAdapter<Sign,RvAdapter.VH>(MyDiffUtil()) {
-    lateinit var h:VH
-    class VH(val binding: ItemBinding):ViewHolder(binding.root)
+// this adapter has a position problem
+class RvAdapter(val onClick: OnClick) : RecyclerView.Adapter<RvAdapter.VH>() {
+    class VH(val binding: ItemBinding) : ViewHolder(binding.root)
 
-    class MyDiffUtil:DiffUtil.ItemCallback<Sign>() {
+    val differCallback = object : DiffUtil.ItemCallback<Sign>() {
         override fun areItemsTheSame(oldItem: Sign, newItem: Sign): Boolean {
-            return oldItem.id == newItem.id
+            return oldItem.image == newItem.image && oldItem.id == newItem.id
         }
 
         override fun areContentsTheSame(oldItem: Sign, newItem: Sign): Boolean {
@@ -26,39 +27,42 @@ class RvAdapter(val onClick: OnClick):ListAdapter<Sign,RvAdapter.VH>(MyDiffUtil(
         }
     }
 
+    val differ = AsyncListDiffer(this,differCallback)
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-        val binding = ItemBinding.inflate(LayoutInflater.from(parent.context),parent,false)
+        val binding = ItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return VH(binding)
     }
 
+    override fun getItemCount(): Int {
+        return differ.currentList.size
+    }
+
     override fun onBindViewHolder(holder: VH, position: Int) {
-        h = holder
-        holder.binding.itemName.text = getItem(position).name
-        holder.binding.itemImage.setImageURI(Uri.parse(getItem(position).image))
-        if (getItem(position).liked == 1){
-            holder.binding.itemLike.setImageResource(R.drawable.liked)
-        }else
-            holder.binding.itemLike.setImageResource(R.drawable.not_liked)
+        val item = differ.currentList[position]
+
+        holder.binding.itemName.text = item.name
+        holder.binding.itemImage.setImageURI(Uri.parse(item.image))
+        if (item.liked == 1) {
+            holder.binding.itemLike.setImageResource(R.drawable.bookmark_fill24px)
+        } else
+            holder.binding.itemLike.setImageResource(R.drawable.bookmark24px)
 
         holder.binding.card.setOnClickListener {
-            onClick.onClick(getItem(position))
+            onClick.onClick(item)
         }
         holder.binding.itemEdit.setOnClickListener {
-            onClick.onEdit(getItem(position),position)
+            onClick.onEdit(item, position)
         }
         holder.binding.itemDelete.setOnClickListener {
             println("rv ichi detele")
-            onClick.onDelete(getItem(position))
+            onClick.onDelete(item)
         }
         holder.binding.itemLike.setOnClickListener {
-            onClick.onLike(getItem(position),holder.binding)
+            println("position: $position")
+            onClick.onLike(item, holder.binding)
         }
     }
 
-//    fun setLiked(){
-//        h.binding.itemLike.setImageResource(R.drawable.liked)
-//    }
-//    fun setNotLiked(){
-//        h.binding.itemLike.setImageResource(R.drawable.not_liked)
-//    }
+
 }

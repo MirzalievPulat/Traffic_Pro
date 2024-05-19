@@ -7,90 +7,72 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.kotlin.subscribeBy
+import io.reactivex.rxjava3.schedulers.Schedulers
 import uz.frodo.trafficpro.adapter.RvAdapter
 import uz.frodo.trafficpro.databinding.FragmentLikedBinding
 import uz.frodo.trafficpro.databinding.ItemBinding
-import uz.frodo.trafficpro.db.MyDbHelper
+import uz.frodo.trafficpro.databinding.ItemSearchBinding
+import uz.frodo.trafficpro.models.AppDatabase
+import uz.frodo.trafficpro.models.Dao
 import uz.frodo.trafficpro.models.Sign
 
 
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
+                                            // this fragment has deleting problem
 class LikedFragment : Fragment(),OnClick {
     lateinit var binding: FragmentLikedBinding
     lateinit var adapter: RvAdapter
-    lateinit var myDbHelper: MyDbHelper
-    lateinit var list:ArrayList<Sign>
-    var pos = -1
-    private var param1: String? = null
-    private var param2: String? = null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    lateinit var dao: Dao
+    var disposable = CompositeDisposable()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        myDbHelper = MyDbHelper(requireContext())
         binding = FragmentLikedBinding.inflate(layoutInflater)
-        adapter = RvAdapter(this)
-        list = myDbHelper.getLikedSigns()
-        println("mana liked: $list")
-        adapter.submitList(list)
+        dao = AppDatabase.getInstance(requireContext()).dao()
+
+        val adapter = RvAdapter(this)
         binding.rvLiked.adapter = adapter
+
+        disposable.add(dao.getLikedSigns()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeBy(
+                onNext = { it ->
+                    adapter.differ.submitList(it)
+                }
+
+            ))
 
         return binding.root
     }
 
-    companion object {
-        fun newInstance(param1: String, param2: String) =
-            LikedFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
-    }
+
 
     override fun onClick(sign: Sign) {
         startActivity(Intent(requireContext(),AboutActivity::class.java).putExtra("about",sign))
     }
 
     override fun onEdit(sign: Sign,position:Int) {
-        pos = position
-        startActivityForResult(Intent(requireContext(),EditActivity::class.java).putExtra("edit",sign),1)
+        startActivity(Intent(requireContext(),EditActivity::class.java).putExtra("edit",sign))
     }
 
     override fun onDelete(sign: Sign) {
-        list.remove(sign)
-        myDbHelper.deleteSign(sign)
-        adapter.submitList(list)
-        binding.rvLiked.adapter = adapter
+        dao.deleteSign(sign)
     }
 
-    override fun onLike(sign: Sign, b: ItemBinding) {
-        list.remove(sign)
+    override fun onLike(sign: Sign, b: ItemBinding?,bS:ItemSearchBinding?) {
+        println(sign)
         sign.liked = 0
-        myDbHelper.updateSign(sign)
-        adapter.submitList(list)
-        binding.rvLiked.adapter = adapter
+        dao.updateSign(sign)
+
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 1 && resultCode == Activity.RESULT_OK && data != null){
-            val s = data.getParcelableExtra<Sign>("sign")
-            myDbHelper.updateSign(s!!)
-            list[pos] = s
-            adapter.submitList(list)
-            binding.rvLiked.adapter = adapter
-        }
+    override fun onDestroy() {
+        super.onDestroy()
+        disposable.clear()
     }
 }

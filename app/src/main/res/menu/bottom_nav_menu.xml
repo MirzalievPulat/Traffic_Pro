@@ -2,15 +2,21 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
     <item
         android:id="@+id/menu_home"
-        android:icon="@drawable/home"
-
+        android:icon="@drawable/home24px"
         android:title="Home" />
+
     <item
         android:id="@+id/menu_liked"
-        android:icon="@drawable/heart_2"
-        android:title="Liked" />
+        android:icon="@drawable/bookmark24px"
+        android:title="Saved" />
+
     <item
-        android:id="@+id/menu_info"
-        android:icon="@drawable/info_1"
-        android:title="info" />
+        android:id="@+id/menu_learn"
+        android:icon="@drawable/menu_book24px"
+        android:title="Learn" />
+
+    <item
+        android:id="@+id/menu_test"
+        android:icon="@drawable/quiz24px"
+        android:title="Test" />
 </menu>

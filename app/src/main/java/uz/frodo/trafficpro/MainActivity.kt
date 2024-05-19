@@ -27,10 +27,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-//this activity only for example, it doesn't have job in this app
-
-// Heeeeeey!!!!!!!
-// Also this app has some issues if you edit the type it won't change in changed type
+//this activity is only for example, it doesn't have a job in this app
 
 class MainActivity : AppCompatActivity() {
     lateinit var binding: ActivityMainBinding
@@ -97,7 +94,6 @@ class MainActivity : AppCompatActivity() {
         inputStream?.copyTo(outputStream)
         inputStream?.close()
         outputStream.close()
-        println(file.absolutePath)
 
     }
 

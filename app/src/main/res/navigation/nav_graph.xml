@@ -13,12 +13,17 @@
     <fragment
         android:id="@+id/menu_liked"
         android:name="uz.frodo.trafficpro.LikedFragment"
-        android:label="Yoqtirganlar"
+        android:label="Saqlangan"
         tools:layout="@layout/fragment_liked" />
     <fragment
-        android:id="@+id/menu_info"
-        android:name="uz.frodo.trafficpro.InfoFragment"
-        android:label="Biz haqimizda"
-        tools:layout="@layout/fragment_info" />
+        android:id="@+id/menu_test"
+        android:name="uz.frodo.trafficpro.TestFragment"
+        android:label="Test"
+        tools:layout="@layout/fragment_test" />
+    <fragment
+        android:id="@+id/menu_learn"
+        android:name="uz.frodo.trafficpro.LearnFragment"
+        android:label="Barcha yo'l belgilari"
+        tools:layout="@layout/fragment_learn" />
 
 </navigation>

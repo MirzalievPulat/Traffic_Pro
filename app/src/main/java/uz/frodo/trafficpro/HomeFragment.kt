@@ -41,7 +41,9 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentHomeBinding.inflate(layoutInflater)
-        val titleList = arrayListOf<String>("Ogohlantiruvchi", "Imtiyozli", "Ta'qiqlovchi", "Buyuruvchi")
+        val titleList =
+            arrayListOf("Ogohlantiruvchi", "Imtiyozli", "Ta'qiqlovchi", "Buyuruvchi","Axborot-ishora","Servis",
+                "Qo'shimcha", "Vaqtinchalik")
 
         adapter = ViewPagerAdapter(requireActivity(), titleList)
         binding.viewPager.adapter = adapter
@@ -58,26 +60,24 @@ class HomeFragment : Fragment() {
                 when (menuItem.itemId) {
                     R.id.add_sign -> {
                         val intent = Intent(requireContext(), AddActivity::class.java)
-                        activityLauncher.launch(intent)
+                        startActivity(intent)
+                    }
+                    R.id.search_sign -> {
+                        val intent = Intent(requireContext(), SearchActivity::class.java)
+                        startActivity(intent)
+                    }
+                    R.id.info_sign -> {
+                        val intent = Intent(requireContext(), InfoActivity::class.java)
+                        startActivity(intent)
                     }
                 }
                 return true
             }
         }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+
         return binding.root
     }
 
 
-    val activityLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val fragments = adapter.getFragmentList()
-            println(fragments)
-            for (i in fragments.indices) {
-                println(fragments[i].param1)
-                if (fragments[i].param1 != null)
-                    fragments[i].updateFragment()
-            }
-        }
-    }
 
 }

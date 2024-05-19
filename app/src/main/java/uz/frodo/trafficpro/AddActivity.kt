@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -19,7 +20,8 @@ import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import uz.frodo.trafficpro.databinding.ActivityAddBinding
 import uz.frodo.trafficpro.databinding.DialogLayoutBinding
-import uz.frodo.trafficpro.db.MyDbHelper
+import uz.frodo.trafficpro.models.AppDatabase
+import uz.frodo.trafficpro.models.Dao
 import uz.frodo.trafficpro.models.Sign
 import java.io.File
 import java.io.FileOutputStream
@@ -29,7 +31,7 @@ import java.util.Date
 import java.util.Locale
 
 class AddActivity : AppCompatActivity() {
-    lateinit var myDbHelper: MyDbHelper
+    lateinit var dao: Dao
     lateinit var binding: ActivityAddBinding
     var path:String = ""
     private lateinit var photoURI: Uri
@@ -37,10 +39,9 @@ class AddActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityAddBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        myDbHelper = MyDbHelper(this)
+        dao = AppDatabase.getInstance(this).dao()
 
         binding.addImage.setOnClickListener {
-            println("rasm bosildi")
             checkForPermission()
         }
 
@@ -48,11 +49,9 @@ class AddActivity : AppCompatActivity() {
             val name = binding.addName.text.toString()
             val about = binding.addAbout.text.toString()
             val type = binding.addSpinner.selectedItem.toString()
-            println("before adding:$path")
             if (name.isNotBlank() && about.isNotBlank() && path.isNotBlank()){
-                val sign = Sign(0,name,about,path,type,0)
-                myDbHelper.addSign(sign)
-                setResult(RESULT_OK,Intent().putExtra("type",sign.type))
+                val sign = Sign(name,about,path,type,0)
+                dao.addSign(sign)
                 finish()
             }else
                 Toast.makeText(applicationContext, "Fill the blank", Toast.LENGTH_SHORT).show()
@@ -76,7 +75,7 @@ class AddActivity : AppCompatActivity() {
                         dialog.setView(custom.root)
                         custom.dialogCamra.setOnClickListener {
                             val imageFile = createImageFile()
-                            photoURI = FileProvider.getUriForFile(this@AddActivity, "uz.frodo.trafficpro", imageFile)
+                            photoURI = FileProvider.getUriForFile(this@AddActivity, "uz.frodo.trafficpro.provider", imageFile)
                             getImageFromCamera.launch(photoURI)
                             dialog.dismiss()
                         }
@@ -117,17 +116,22 @@ class AddActivity : AppCompatActivity() {
 
     var getImage  = registerForActivityResult(ActivityResultContracts.GetContent()){uri ->
         uri?:return@registerForActivityResult
+
         binding.addImage.setImageURI(uri)
+        println("Uri: $uri")
 
         val format = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
         val inputStream = contentResolver?.openInputStream(uri)
-        val file = File(filesDir,"image_$format.jpg")
+        val file = File(filesDir,"image_$format.png")
         val outputStream = FileOutputStream(file)
         inputStream?.copyTo(outputStream)
         inputStream?.close()
         outputStream.close()
         path = file.absolutePath
-        println("first path: $path")
+        Log.d("TTT","path -> $path")
+        println("Path: $path")
+        val a = Uri.parse(path)
+        println("After parse: " + a)///data/user/0/uz.frodo.trafficpro/files/image_20240413_171502.jpg
     }
 
     @Throws(IOException::class)

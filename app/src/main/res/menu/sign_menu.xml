@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/a"
+        android:title=""
+        app:showAsAction="always"
+        android:icon="@drawable/menu_more">
+        <menu>
+<!--            <item-->
+<!--                android:id="@+id/share_sign"-->
+<!--                android:icon="@drawable/menu_share"-->
+<!--                android:title="Ulashish"-->
+<!--                app:showAsAction="never" />-->
+            <item
+                android:id="@+id/edit_sign"
+                android:icon="@drawable/menu_edit"
+                android:title="Taxrirlash"
+                app:showAsAction="never" />
+            <item
+                android:id="@+id/delete_sign"
+                android:icon="@drawable/menu_delete"
+                android:title="O'chirish"
+                app:showAsAction="never" />
+        </menu>
+    </item>
+
+
+</menu>

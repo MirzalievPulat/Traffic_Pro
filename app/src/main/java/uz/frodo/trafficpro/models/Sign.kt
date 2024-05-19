@@ -2,26 +2,32 @@ package uz.frodo.trafficpro.models
 
 import android.os.Parcel
 import android.os.Parcelable
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+@Entity
+data class Sign(var name: String?, var about: String?, var image: String?, var type: String?, var
+liked:Int) :Parcelable {
 
-data class Sign(var id:Int? = null, var name: String?, var about: String?, var image: String?, var type: String?, var
-liked:Int) : Parcelable {
+    @PrimaryKey(autoGenerate = true)
+    var id:Int = 0
+
     constructor(parcel: Parcel) : this(
-        parcel.readValue(Int::class.java.classLoader) as? Int,
         parcel.readString(),
         parcel.readString(),
         parcel.readString(),
         parcel.readString(),
         parcel.readInt()
     ) {
+        id = parcel.readInt()
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeValue(id)
         parcel.writeString(name)
         parcel.writeString(about)
         parcel.writeString(image)
         parcel.writeString(type)
         parcel.writeInt(liked)
+        parcel.writeInt(id)
     }
 
     override fun describeContents(): Int {
@@ -37,4 +43,6 @@ liked:Int) : Parcelable {
             return arrayOfNulls(size)
         }
     }
+
+
 }

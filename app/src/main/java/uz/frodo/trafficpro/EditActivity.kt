@@ -13,7 +13,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import uz.frodo.trafficpro.databinding.ActivityEditBinding
 import uz.frodo.trafficpro.databinding.DialogLayoutBinding
-import uz.frodo.trafficpro.db.MyDbHelper
+import uz.frodo.trafficpro.models.AppDatabase
 import uz.frodo.trafficpro.models.Sign
 import java.io.File
 import java.io.FileOutputStream
@@ -29,11 +29,12 @@ class EditActivity : AppCompatActivity() {
     lateinit var binding: ActivityEditBinding
     var path = ""
     private lateinit var photoURI: Uri
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityEditBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        val myDbHelper = MyDbHelper(this)
+        val dao = AppDatabase.getInstance(this).dao()
 
         val sign = intent.getParcelableExtra<Sign>("edit")
 
@@ -46,6 +47,10 @@ class EditActivity : AppCompatActivity() {
             "Imtiyozli"-> binding.addSpinner.setSelection(1)
             "Ta'qiqlovchi"-> binding.addSpinner.setSelection(2)
             "Buyuruvchi"-> binding.addSpinner.setSelection(3)
+            "Axborot-ishora"-> binding.addSpinner.setSelection(4)
+            "Servis"-> binding.addSpinner.setSelection(5)
+            "Qo'shimcha"-> binding.addSpinner.setSelection(6)
+            "Vaqtinchalik"-> binding.addSpinner.setSelection(7)
         }
 
         binding.addImage.setOnClickListener {
@@ -54,7 +59,7 @@ class EditActivity : AppCompatActivity() {
             dialog.setView(custom.root)
             custom.dialogCamra.setOnClickListener {
                 val imageFile = createImageFile()
-                photoURI = FileProvider.getUriForFile(this, "uz.frodo.trafficpro", imageFile)
+                photoURI = FileProvider.getUriForFile(this, "uz.frodo.trafficpro.provider", imageFile)
                 getImageFromCamera.launch(photoURI)
                 dialog.dismiss()
             }
@@ -69,12 +74,13 @@ class EditActivity : AppCompatActivity() {
             val name = binding.addName.text.toString()
             val about = binding.addAbout.text.toString()
             val type = binding.addSpinner.selectedItem.toString()
-            println("before adding:$path")
             if (name.isNotBlank() && about.isNotBlank() && path.isNotBlank()){
-                val s = Sign(sign.id,name,about,path,type,sign.liked)
-                val i = Intent().putExtra("sign",s)
-                setResult(RESULT_OK,i)
+                val s = Sign(name,about,path,type,sign.liked)
+                s.id = sign.id
+                val intent = Intent().putExtra("sign",s)
+                setResult(RESULT_OK,intent)
                 finish()
+                dao.updateSign(s)
             }else
                 Toast.makeText(applicationContext, "Fill the blank", Toast.LENGTH_SHORT).show()
         }
